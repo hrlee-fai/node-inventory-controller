@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-inventory-controller
+  namespace: node-inventory-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: node-inventory-controller}
+  template:
+    metadata:
+      labels: {app: node-inventory-controller}
+    spec:
+      serviceAccountName: node-inventory-controller
+      containers:
+      - name: controller
+        image: node-inventory-controller:local
+        args: ["--leader-elect=true", "--interval=1m"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 50m, memory: 64Mi}
+          limits: {memory: 256Mi}
