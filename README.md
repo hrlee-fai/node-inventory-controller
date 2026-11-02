@@ -23,3 +23,9 @@ Go 1.24와 Kubernetes API 접근 환경이 필요하다. `make generate`, `make 
 bridge에 `config/rbac/bridge-role.yaml`의 get 권한을 별도 ClusterRoleBinding으로 부여한다. 공유 service account의 cluster-scoped RBAC만으로 각 bridge가 자기 노드의 inventory만 읽도록 강제할 수 없다. 더 강한 격리는 별도 인증/인가 설계가 필요하다. 실제 bridge 소스를 확보한 후 원래의 timer, cooldown, dry-run, sentinel 동작과 통합 테스트해야 한다.
 
 kured annotation, 로그 부재, `spec.unschedulable`은 drain 완료나 reboot 성공의 증거가 아니다. 성공 판정은 범위 밖이며 별도로 boot ID 변경과 Ready 복귀 등 증거가 필요하다. kind의 모의 reboot은 실제 reboot이 아니다.
+
+## NodeRepair 미리보기
+
+`NodeRepair`는 현재 **읽기 전용 dry-run만** 지원한다. `config/samples/repair.yaml`의 노드 이름과 UID를 지정해 생성하면 controller가 노드에 배치된 Pod와 같은 namespace의 일치하는 PDB를 관측해 `status.preview`에 기록한다. mirror Pod와 DaemonSet 소유 Pod는 제외 대상으로 분류하고, 삭제 중인 Pod는 별도로 표시한다. PDB의 `disruptionsAllowed`와 generation은 참고 정보이며 eviction의 성공 또는 차단 원인을 보장하지 않는다. Node UID가 바뀌거나 API 조회가 실패하면 preview를 제거하고 `PreviewAvailable=Unknown`으로 표시한다. controller가 멈추거나 status 쓰기가 실패하면 이전 status가 남을 수 있으므로 `observedAt`과 condition의 `observedGeneration`을 확인한다. 200개가 넘는 Pod는 불완전한 결과를 제공하지 않고 보류한다.
+
+이 단계는 Node, Pod 또는 PDB를 수정하지 않는다. 단일 노드 실제 drain, 복구 작업의 소유권 및 동시성, DrainPolicy, rollout과 reboot은 아직 구현되지 않았다. 샘플과 CRD 설치 후 `kubectl get noderepairs` 및 `kubectl get noderepair <name> -o yaml`로 확인할 수 있다. 설치나 클러스터 변경은 별도 승인 후 진행한다.

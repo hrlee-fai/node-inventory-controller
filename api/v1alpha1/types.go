@@ -12,7 +12,7 @@ import (
 
 var GroupVersion = schema.GroupVersion{Group: "infra.fai.devops", Version: "v1alpha1"}
 var SchemeBuilder = runtime.NewSchemeBuilder(func(s *runtime.Scheme) error {
-	s.AddKnownTypes(GroupVersion, &NodeInventory{}, &NodeInventoryList{})
+	s.AddKnownTypes(GroupVersion, &NodeInventory{}, &NodeInventoryList{}, &NodeRepair{}, &NodeRepairList{})
 	metav1.AddToGroupVersion(s, GroupVersion)
 	return nil
 })

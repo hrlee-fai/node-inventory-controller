@@ -5,6 +5,7 @@ import (
 	api "github.com/hrlee-fai/node-inventory-controller/api/v1alpha1"
 	"github.com/hrlee-fai/node-inventory-controller/internal/controller"
 	corev1 "k8s.io/api/core/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -25,6 +26,7 @@ func main() {
 	}
 	s := runtime.NewScheme()
 	_ = corev1.AddToScheme(s)
+	_ = policyv1.AddToScheme(s)
 	_ = api.AddToScheme(s)
 	m, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{Scheme: s, LeaderElection: leader, LeaderElectionID: "node-inventory.infra.fai.devops", Metrics: server.Options{BindAddress: "0"}})
 	if err != nil {
@@ -33,6 +35,10 @@ func main() {
 	}
 	if err = (&controller.Reconciler{Client: m.GetClient(), Reader: m.GetAPIReader(), Interval: interval}).SetupWithManager(m); err != nil {
 		ctrl.Log.Error(err, "setup")
+		os.Exit(1)
+	}
+	if err = (&controller.RepairReconciler{Client: m.GetClient(), Reader: m.GetAPIReader(), Interval: interval}).SetupWithManager(m); err != nil {
+		ctrl.Log.Error(err, "repair setup")
 		os.Exit(1)
 	}
 	if err = m.Start(ctrl.SetupSignalHandler()); err != nil {

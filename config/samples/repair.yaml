@@ -1,0 +1,11 @@
+apiVersion: infra.fai.devops/v1alpha1
+kind: NodeRepair
+metadata:
+  name: worker-01-preview
+spec:
+  nodeRef:
+    name: worker-01
+    uid: replace-with-node-uid
+  operation: CordonDrain
+  dryRun: true
+  reason: operator-requested-preview
