@@ -1,0 +1,17 @@
+apiVersion: infra.fai.devops/v1alpha1
+kind: NodeInventory
+metadata:
+  name: worker-01
+spec:
+  nodeRef:
+    uid: replace-with-node-uid
+  baseline:
+    capturedAt: "2026-11-02T00:00:00Z"
+    nodeInfo:
+      operatingSystem: linux
+      architecture: amd64
+      kernelVersion: replace-with-approved-kernel
+    capacity:
+      cpu: "32"
+      memory: 128Gi
+      nvidia.com/gpu: "8"
