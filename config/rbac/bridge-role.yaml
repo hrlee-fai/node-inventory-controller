@@ -1,0 +1,8 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-inventory-bridge-reader
+rules:
+- apiGroups: [infra.fai.devops]
+  resources: [nodeinventories]
+  verbs: [get]
